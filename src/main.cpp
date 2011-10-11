@@ -30,22 +30,24 @@ static const char version[] = "1.0";
 
 int main(int argc, char **argv)
 {
-    KAboutData about("nepomukrecommendation", 0, ki18n("nepomukrecommendation"), version, ki18n(description),
-                     KAboutData::License_GPL, ki18n("(C) 2011 Phaneendra Hegde"), KLocalizedString(), 0, "pnh.pes@gmail.com");
-    about.addAuthor( ki18n("Phaneendra Hegde"), KLocalizedString(), "pnh.pes@gmail.com" );
-    KCmdLineArgs::init(argc, argv, &about);
-    about.setProgramIconName("nepomuk");
+    KAboutData about( "nepomukrecommendation", 0, ki18n("nepomukrecommendation"), version, ki18n(description),
+                     KAboutData::License_GPL, ki18n("(C) 2011 Phaneendra Hegde"), KLocalizedString(), 0, "pnh.pes@gmail.com" );
+    about.addAuthor( ki18n( "Phaneendra Hegde" ), KLocalizedString(), "pnh.pes@gmail.com" );
+    about.addAuthor( ki18n( "Phalgun G"), KLocalizedString(), "phalgun.guduthur@gmail.com" );
+    about.addAuthor( ki18n("Nitheesh KL"),KLocalizedString(), "nitheeshkl@gmail.com" );
+    KCmdLineArgs::init( argc, argv, &about );
+    about.setProgramIconName( "nepomuk" );
     KCmdLineOptions options;
     options.add("+[URL]", ki18n( "Document to open" ));
-    KCmdLineArgs::addCmdLineOptions(options);
+    KCmdLineArgs::addCmdLineOptions( options );
     KApplication app;
 
     nepomukrecommendation *widget = new nepomukrecommendation;
 
     // see if we are starting with session management
-    if (app.isSessionRestored())
+    if ( app.isSessionRestored() )
     {
-        RESTORE(nepomukrecommendation);
+        RESTORE( nepomukrecommendation );
     }
     else
     {

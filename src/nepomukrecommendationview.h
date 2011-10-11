@@ -55,7 +55,7 @@ public:
 
 private:
     Ui::nepomukrecommendationview_base ui_nepomukrecommendationview_base;
-    Nepomuk::Utils::SimpleResourceModel *m_resourceModel;
+    Nepomuk::Utils::SimpleResourceModel *m_resourceModel,*m_recommendationModel;
 
 signals:
     /**
@@ -72,6 +72,7 @@ signals:
 private slots:
     void switchColors();
     void settingsChanged();
+    void resourceSelected();
 
     void on_searchBox_returnPressed(QString );
 };

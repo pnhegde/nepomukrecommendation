@@ -45,14 +45,26 @@ nepomukrecommendationView::nepomukrecommendationView(QWidget *)
     settingsChanged();
     setAutoFillBackground(true);
     m_resourceModel = new Nepomuk::Utils::SimpleResourceModel(this);
+    m_recommendationModel = new Nepomuk::Utils::SimpleResourceModel(this);
     ui_nepomukrecommendationview_base.resourceView->setModel(m_resourceModel);
-    //resourceQuery();
+    ui_nepomukrecommendationview_base.resourceView->setViewMode(ui_nepomukrecommendationview_base.resourceView->IconMode);
+    ui_nepomukrecommendationview_base.recommendationView->setModel(m_recommendationModel);
+    ui_nepomukrecommendationview_base.recommendationView->setViewMode(ui_nepomukrecommendationview_base.recommendationView->IconMode);
+    connect(ui_nepomukrecommendationview_base.resourceView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(resourceSelected()));
+    resourceQuery();
 
 }
 
 nepomukrecommendationView::~nepomukrecommendationView()
 {
 
+}
+
+void nepomukrecommendationView::resourceSelected()
+{
+    Nepomuk::Resource rsc = m_resourceModel->resourceForIndex(ui_nepomukrecommendationview_base.resourceView->selectionModel()->currentIndex() );
+    QList<Nepomuk::Resource> relatedResourceList = rsc.isRelateds();
+    m_recommendationModel->setResources(relatedResourceList);
 }
 
 void nepomukrecommendationView::switchColors()
@@ -79,28 +91,39 @@ void nepomukrecommendationView::settingsChanged()
 void nepomukrecommendationView::resourceQuery()
 {
 
-
-
-
+    m_resourceModel->clear();
+    Nepomuk::Query::Term term = Nepomuk::Query::ResourceTypeTerm( Nepomuk::Vocabulary::PIMO::Person() );
+    Nepomuk::Query::Query query( term );
+    query.setLimit( 10 );
+    QList<Nepomuk::Query::Result>results = Nepomuk::Query::QueryServiceClient::syncQuery( query );
+    QList <Nepomuk::Resource> resource;
+    Q_FOREACH( const Nepomuk::Query::Result& result, results ) {
+        resource.append( result.resource() );
+    }
+    m_resourceModel->setResources( resource );
 }
-
 
 
 void nepomukrecommendationView::on_searchBox_returnPressed(QString str )
 {
 
-    Nepomuk::Query::ComparisonTerm linkTerm(Nepomuk::Vocabulary::NIE::plainTextContent(),
-      Nepomuk::Query::LiteralTerm(str));
+    if( str=="" ) {
+        resourceQuery();
+    }
+    else {
+        Nepomuk::Query::ComparisonTerm linkTerm(Nepomuk::Vocabulary::NIE::plainTextContent(),
+        Nepomuk::Query::LiteralTerm(str));
 
-  //linkTerm.setVariableName(QLatin1String("text"));
-  Nepomuk::Query::Query query(linkTerm);
-  query.addRequestProperty(Nepomuk::Query::Query::RequestProperty(Nepomuk::Vocabulary::NIE::lastModified()));
+        //linkTerm.setVariableName(QLatin1String("text"));
+        Nepomuk::Query::Query query(linkTerm);
+        query.addRequestProperty(Nepomuk::Query::Query::RequestProperty(Nepomuk::Vocabulary::NIE::lastModified()));
 
-  QList<Nepomuk::Query::Result>results = Nepomuk::Query::QueryServiceClient::syncQuery( query );
-  QList<Nepomuk::Resource> resource;
-  Q_FOREACH( const Nepomuk::Query::Result& result, results ) {
-          resource.append( result.resource() );
-      }
-  m_resourceModel->setResources( resource );
+        QList<Nepomuk::Query::Result>results = Nepomuk::Query::QueryServiceClient::syncQuery( query );
+        QList<Nepomuk::Resource> resource;
+        Q_FOREACH( const Nepomuk::Query::Result& result, results ) {
+            resource.append( result.resource() );
+        }
+        m_resourceModel->setResources( resource );
+    }
 }
 #include "nepomukrecommendationview.moc"

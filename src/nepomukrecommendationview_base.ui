@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>315</width>
-    <height>233</height>
+    <width>574</width>
+    <height>402</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,6 +32,16 @@
       <widget class="KLineEdit" name="searchBox">
        <property name="placeholderText">
         <string>Search for Nepomuk resources</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QListView" name="recommendationView"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Recommendation</string>
        </property>
       </widget>
      </item>
