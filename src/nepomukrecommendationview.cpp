@@ -22,6 +22,7 @@
 
 #include <KLocale>
 #include <QtGui/QLabel>
+#include <QDebug>
 #include <Nepomuk/Query/Term>
 #include <Nepomuk/Query/Result>
 #include <Nepomuk/Query/ResourceTypeTerm>
@@ -49,7 +50,7 @@ nepomukrecommendationView::nepomukrecommendationView(QWidget *)
     ui_nepomukrecommendationview_base.resourceView->setModel(m_resourceModel);
     ui_nepomukrecommendationview_base.resourceView->setViewMode(ui_nepomukrecommendationview_base.resourceView->IconMode);
     ui_nepomukrecommendationview_base.recommendationView->setModel(m_recommendationModel);
-    ui_nepomukrecommendationview_base.recommendationView->setViewMode(ui_nepomukrecommendationview_base.recommendationView->IconMode);
+   // ui_nepomukrecommendationview_base.recommendationView->setViewMode(ui_nepomukrecommendationview_base.recommendationView->IconMode);
     connect(ui_nepomukrecommendationview_base.resourceView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(resourceSelected()));
     resourceQuery();
 
@@ -64,7 +65,14 @@ void nepomukrecommendationView::resourceSelected()
 {
     Nepomuk::Resource rsc = m_resourceModel->resourceForIndex(ui_nepomukrecommendationview_base.resourceView->selectionModel()->currentIndex() );
     QList<Nepomuk::Resource> relatedResourceList = rsc.isRelateds();
-    m_recommendationModel->setResources(relatedResourceList);
+    if( relatedResourceList.isEmpty() ) {
+        m_recommendationModel->setResources(resourceSearch(rsc.label()));
+        qDebug()<<rsc.label();
+    }
+    else {
+        m_recommendationModel->setResources(relatedResourceList);
+    }
+
 }
 
 void nepomukrecommendationView::switchColors()
@@ -111,19 +119,25 @@ void nepomukrecommendationView::on_searchBox_returnPressed(QString str )
         resourceQuery();
     }
     else {
-        Nepomuk::Query::ComparisonTerm linkTerm(Nepomuk::Vocabulary::NIE::plainTextContent(),
-        Nepomuk::Query::LiteralTerm(str));
-
-        //linkTerm.setVariableName(QLatin1String("text"));
-        Nepomuk::Query::Query query(linkTerm);
-        query.addRequestProperty(Nepomuk::Query::Query::RequestProperty(Nepomuk::Vocabulary::NIE::lastModified()));
-
-        QList<Nepomuk::Query::Result>results = Nepomuk::Query::QueryServiceClient::syncQuery( query );
-        QList<Nepomuk::Resource> resource;
-        Q_FOREACH( const Nepomuk::Query::Result& result, results ) {
-            resource.append( result.resource() );
-        }
-        m_resourceModel->setResources( resource );
+       m_resourceModel->setResources( resourceSearch(str) );
     }
+}
+
+QList<Nepomuk::Resource> nepomukrecommendationView::resourceSearch(const QString str)
+{
+    Nepomuk::Query::ComparisonTerm linkTerm(Nepomuk::Vocabulary::NIE::plainTextContent(),
+    Nepomuk::Query::LiteralTerm(str));
+
+    //linkTerm.setVariableName(QLatin1String("text"));
+    Nepomuk::Query::Query query(linkTerm);
+    query.addRequestProperty(Nepomuk::Query::Query::RequestProperty(Nepomuk::Vocabulary::NIE::lastModified()));
+
+    QList<Nepomuk::Query::Result>results = Nepomuk::Query::QueryServiceClient::syncQuery( query );
+    QList<Nepomuk::Resource> resource;
+    Q_FOREACH( const Nepomuk::Query::Result& result, results ) {
+        resource.append( result.resource() );
+    }
+    return resource;
+
 }
 #include "nepomukrecommendationview.moc"

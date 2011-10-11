@@ -51,7 +51,8 @@ public:
      * Destructor
      */
     virtual ~nepomukrecommendationView();
-       void resourceQuery();
+    void resourceQuery();
+    QList<Nepomuk::Resource> resourceSearch(const QString str);
 
 private:
     Ui::nepomukrecommendationview_base ui_nepomukrecommendationview_base;
